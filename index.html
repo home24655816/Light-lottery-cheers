@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>燈號抽獎程式</title>
+  <style>
+    body { text-align: center; font-family: sans-serif; }
+    .lights-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    .light {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 10px;
+      background-color: lightgray;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      padding: 5px;
+    }
+    .active {
+      background-color: gold;
+      box-shadow: 0 0 20px gold;
+    }
+    #spinBtn { padding: 10px 20px; font-size: 20px; margin-top: 20px; }
+    #prizeImg { margin-top: 20px; max-width: 200px; display: none; }
+  </style>
+</head>
+<body>
+  <h1>歡迎來到燈號抽獎</h1>
+  <div class="lights-container" id="lights"></div>
+  <button id="spinBtn">抽獎！</button>
+  <p id="result"></p>
+  <img id="prizeImg" src="" alt="中獎獎品圖片">
+  <audio id="spinSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="winSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_706f1c50e8.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
+  <audio id="cheerSound" src="https://cdn.pixabay.com/download/audio/2022/03/01/audio_9be62c9d55.mp3?filename=audience-light-cheer-6730.mp3"></audio>
+
+  <script>
+    const prizes = [
+      { name: '貳獎：打地鼠遊戲機', probability: 0.10, img: './打地鼠.jpg' },
+      { name: '舒壓按摩鍵盤', probability: 0.2133, img: './電腦發光按鍵.jpg' },
+      { name: '頭獎：復古可錄音播放器', probability: 0.08, img: './錄音機.jpg' },
+      { name: '盲袋', probability: 0.2133, img: './盲袋.jpg' },
+      { name: '特別獎：大聲公擴音器', probability: 0.08, img: './大聲公.jpg' },
+      { name: '迷你扭蛋', probability: 0.2133, img: './扭蛋.jpg' },
+      { name: '三獎：發條小雞', probability: 0.10, img: './發條小雞.jpg' },
+    ];
+
+    const lightsContainer = document.getElementById("lights");
+    const spinBtn = document.getElementById("spinBtn");
+    const result = document.getElementById("result");
+    const prizeImg = document.getElementById("prizeImg");
+    const spinSound = document.getElementById("spinSound");
+    const winSound = document.getElementById("winSound");
+    const cheerSound = document.getElementById("cheerSound");
+
+    prizes.forEach((prize, index) => {
+      const div = document.createElement("div");
+      div.className = "light";
+      div.textContent = prize.name;
+      div.setAttribute("data-index", index);
+      lightsContainer.appendChild(div);
+    });
+
+    spinBtn.addEventListener("click", () => {
+      spinSound.play();
+      result.textContent = '';
+      prizeImg.style.display = 'none';
+      const lights = document.querySelectorAll(".light");
+      lights.forEach(l => l.classList.remove("active"));
+
+      let r = Math.random();
+      let acc = 0;
+      let selectedIndex = -1;
+      for (let i = 0; i < prizes.length; i++) {
+        acc += prizes[i].probability;
+        if (r < acc) {
+          selectedIndex = i;
+          break;
+        }
+      }
+
+      let count = 0;
+      const flashInterval = setInterval(() => {
+        lights.forEach((l, i) => {
+          l.classList.remove("active");
+          if (i === count % prizes.length) {
+            l.classList.add("active");
+          }
+        });
+        count++;
+        if (count > prizes.length * 4 && count % prizes.length === selectedIndex) {
+          clearInterval(flashInterval);
+          winSound.play();
+          cheerSound.play();
+          result.textContent = `恭喜中獎：${prizes[selectedIndex].name}！`;
+          prizeImg.src = prizes[selectedIndex].img;
+          prizeImg.style.display = 'block';
+        }
+      }, 150);
+    });
+  </script>
+</body>
+</html>
